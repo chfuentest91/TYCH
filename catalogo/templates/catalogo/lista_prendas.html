@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — Catálogo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH</a>
+            <div>
+                <a href="/usuarios/perfil/" class="btn btn-outline-light btn-sm me-2">Mi Perfil</a>
+                <a href="/catalogo/publicar/" class="btn btn-light btn-sm me-2">+ Publicar Prenda</a>
+                <a href="/usuarios/logout/" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <h4 class="mb-4">Catálogo de Prendas</h4>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-info">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% if prendas %}
+            <div class="row">
+                {% for prenda in prendas %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        {% if prenda.imagen %}
+                            <img src="{{ prenda.imagen.url }}" class="card-img-top" style="height:200px;object-fit:cover;">
+                        {% else %}
+                            <div class="bg-secondary text-white text-center py-5">Sin imagen</div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ prenda.nombre }}</h5>
+                            <p class="card-text text-muted">{{ prenda.descripcion|truncatewords:10 }}</p>
+                            <p><strong>Precio:</strong> ${{ prenda.precio }}</p>
+                            <p><strong>Talla:</strong> {{ prenda.talla }}</p>
+                            <span class="badge 
+                                {% if prenda.estado == 'disponible' %}bg-success
+                                {% elif prenda.estado == 'reservada' %}bg-warning text-dark
+                                {% else %}bg-danger{% endif %}">
+                                {{ prenda.estado|capfirst }}
+                            </span>
+                        </div>
+                        <div class="card-footer d-flex gap-2">
+                            <a href="/catalogo/editar/{{ prenda.pk }}/" class="btn btn-sm btn-outline-dark">Editar</a>
+                            <a href="/catalogo/estado/{{ prenda.pk }}/" class="btn btn-sm btn-outline-warning">Estado</a>
+                            <a href="/catalogo/eliminar/{{ prenda.pk }}/" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning">No hay prendas publicadas aún.</div>
+        {% endif %}
+    </div>
+</body>
+</html>
