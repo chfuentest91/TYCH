@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — Gestión de Envíos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH — Envíos</a>
+            <a href="/catalogo/" class="btn btn-outline-light btn-sm">Volver al Catálogo</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h4 class="mb-4">Gestión de Envíos</h4>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>N° Orden</th>
+                                <th>Prenda</th>
+                                <th>Cliente</th>
+                                <th>Dirección</th>
+                                <th>Estado</th>
+                                <th>Última actualización</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for envio in envios %}
+                            <tr>
+                                <td><small>{{ envio.orden.buy_order }}</small></td>
+                                <td>{{ envio.orden.prenda.nombre }}</td>
+                                <td>{{ envio.orden.usuario.get_full_name|default:envio.orden.usuario.username }}</td>
+                                <td>{{ envio.direccion|default:"—" }}</td>
+                                <td>
+                                    {% if envio.estado == 'pendiente' %}
+                                        <span class="badge bg-warning text-dark">Pendiente</span>
+                                    {% elif envio.estado == 'en_camino' %}
+                                        <span class="badge bg-primary">En camino</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Entregado</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ envio.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <a href="/envios/actualizar/{{ envio.id }}/"
+                                       class="btn btn-sm btn-outline-dark">Actualizar</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="7" class="text-center text-muted py-3">No hay envíos registrados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

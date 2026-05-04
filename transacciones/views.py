@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 import datetime as dt
 
@@ -26,7 +27,7 @@ def iniciar_pago(request, prenda_id):
     )
 
     if response.status_code == 200:
-        tb_data = response.json()   # {'token': '...', 'url': '...'}
+        tb_data = response.json()
 
         Orden.objects.create(
             prenda    = prenda,
@@ -39,7 +40,7 @@ def iniciar_pago(request, prenda_id):
 
         return render(request, 'transacciones/send-pay.html', {
             'transbank': tb_data,
-            'amount': amount,
+            'amount'   : amount,
         })
     else:
         return render(request, 'transacciones/commit-pay.html', {
@@ -66,8 +67,8 @@ def commit_pago(request):
     response = transbank_service.confirmar_transaccion(token_ws)
 
     if response.status_code == 200:
-        data         = response.json()
-        status       = data.get('status')
+        data          = response.json()
+        status        = data.get('status')
         response_code = data.get('response_code')
 
         if status == 'AUTHORIZED' and response_code == 0:
@@ -79,6 +80,16 @@ def commit_pago(request):
 
             orden.prenda.estado = 'vendida'
             orden.prenda.save()
+
+            # Crear envío automáticamente
+            from envios.models import Envio
+            Envio.objects.get_or_create(
+                orden=orden,
+                defaults={
+                    'estado'   : 'pendiente',
+                    'direccion': orden.usuario.direccion or '',
+                }
+            )
 
             pay_type  = 'Débito' if data.get('payment_type_code') == 'VD' else 'Crédito'
             monto_fmt = f"${int(data.get('amount', 0)):,}".replace(',', '.')
@@ -109,7 +120,6 @@ def commit_pago(request):
 
     return render(request, 'transacciones/commit-pay.html', {'resultado': resultado})
 
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def historial_compras(request):

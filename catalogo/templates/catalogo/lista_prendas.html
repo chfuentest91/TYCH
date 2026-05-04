@@ -109,11 +109,12 @@
                     <div class="card-footer d-flex gap-2 flex-wrap">
                         <a href="/catalogo/detalle/{{ prenda.pk }}/" class="btn btn-sm btn-dark">Ver detalle</a>
                         {% if es_admin %}
-                        <a href="/catalogo/editar/{{ prenda.pk }}/" class="btn btn-sm btn-outline-dark">Editar</a>
-                        <a href="/catalogo/estado/{{ prenda.pk }}/" class="btn btn-sm btn-outline-warning">Estado</a>
-                        <a href="/catalogo/eliminar/{{ prenda.pk }}/" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                        <a href="/envios/" class="btn btn-outline-light btn-sm me-2">Envíos</a>
                         <a href="/inventario/" class="btn btn-outline-light btn-sm me-2">Inventario</a>
                         <a href="/catalogo/publicar/" class="btn btn-light btn-sm me-2">+ Publicar Prenda</a>
+                        {% else %}
+                        <a href="/envios/mis-envios/" class="btn btn-outline-light btn-sm me-2">Mis Envíos</a>
+                        <a href="/transacciones/historial/" class="btn btn-outline-light btn-sm me-2">Mis Compras</a>
                         {% endif %}
                     </div>
                 </div>
