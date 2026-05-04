@@ -1,0 +1,77 @@
+{% load filtros %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — {{ prenda.nombre }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH</a>
+            <a href="/catalogo/" class="btn btn-outline-light btn-sm">Volver al Catálogo</a>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Imagen -->
+            <div class="col-md-6">
+                {% if prenda.imagen %}
+                    <img src="{{ prenda.imagen.url }}" class="img-fluid rounded shadow" style="max-height:450px;width:100%;object-fit:cover;">
+                {% else %}
+                    <div class="bg-secondary text-white text-center py-5 rounded">Sin imagen</div>
+                {% endif %}
+            </div>
+            <!-- Detalle -->
+            <div class="col-md-6">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <h2 class="fw-bold">{{ prenda.nombre }}</h2>
+                        <p class="text-muted">{{ prenda.descripcion }}</p>
+                        <hr>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Categoría:</strong></td>
+                                <td>{{ prenda.categoria }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Talla:</strong></td>
+                                <td>{{ prenda.talla }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Género:</strong></td>
+                                <td>{{ prenda.genero|capfirst }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Estado:</strong></td>
+                                <td>
+                                    <span class="badge {% if prenda.estado == 'disponible' %}bg-success{% elif prenda.estado == 'reservada' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                        {{ prenda.estado|capfirst }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Publicado:</strong></td>
+                                <td>{{ prenda.fecha_publicacion|date:"d/m/Y" }}</td>
+                            </tr>
+                        </table>
+                        <hr>
+                        <p class="fs-2 fw-bold text-dark">${{ prenda.precio|precio_clp }}</p>
+                        {% if prenda.estado == 'disponible' %}
+                            <a href="/transacciones/comprar/{{ prenda.pk }}/" class="btn btn-dark btn-lg w-100">
+                                Comprar ahora
+                            </a>
+                        {% elif prenda.estado == 'reservada' %}
+                            <button class="btn btn-warning btn-lg w-100" disabled>Reservada</button>
+                        {% else %}
+                            <button class="btn btn-danger btn-lg w-100" disabled>Vendida</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
