@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — Conversaciones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH — Mensajería</a>
+            <a href="/catalogo/" class="btn btn-outline-light btn-sm">Volver al Catálogo</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h4 class="mb-4">Conversaciones</h4>
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Prenda</th>
+                            <th>Cliente</th>
+                            <th>Mensajes</th>
+                            <th>Sin leer</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for conv in conversaciones %}
+                        <tr>
+                            <td>{{ conv.prenda.nombre }}</td>
+                            <td>{{ conv.cliente.get_full_name|default:conv.cliente.username }}</td>
+                            <td>{{ conv.mensajes.count }}</td>
+                            <td>
+                                {% with sin_leer=conv.mensajes.filter.leido %}
+                                {% endwith %}
+                                <span class="badge bg-danger">
+                                    {{ conv.mensajes.all|length }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/mensajeria/conversacion/{{ conv.id }}/"
+                                   class="btn btn-sm btn-outline-dark">Ver</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-muted py-3">No hay conversaciones.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

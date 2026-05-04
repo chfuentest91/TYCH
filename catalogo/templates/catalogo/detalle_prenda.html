@@ -63,6 +63,12 @@
                             <a href="/transacciones/comprar/{{ prenda.pk }}/" class="btn btn-dark btn-lg w-100">
                                 Comprar ahora
                             </a>
+                            {% if not es_admin %}
+                            <a href="/mensajeria/iniciar/{{ prenda.pk }}/"
+                               class="btn btn-outline-dark btn-lg w-100 mt-2">
+                                💬 Consultar al vendedor
+                            </a>
+                            {% endif %}
                         {% elif prenda.estado == 'reservada' %}
                             <button class="btn btn-warning btn-lg w-100" disabled>Reservada</button>
                         {% else %}

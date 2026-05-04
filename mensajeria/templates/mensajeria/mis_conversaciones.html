@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — Mis Mensajes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH</a>
+            <a href="/catalogo/" class="btn btn-outline-light btn-sm">Volver al Catálogo</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h4 class="mb-4">Mis Mensajes</h4>
+
+        {% if conversaciones %}
+            {% for conv in conversaciones %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-1">{{ conv.prenda.nombre }}</h6>
+                        <small class="text-muted">{{ conv.mensajes.count }} mensaje(s)</small>
+                    </div>
+                    <a href="/mensajeria/conversacion/{{ conv.id }}/"
+                       class="btn btn-dark btn-sm">Ver conversación</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">No tienes conversaciones aún.</div>
+        {% endif %}
+    </div>
+</body>
+</html>
