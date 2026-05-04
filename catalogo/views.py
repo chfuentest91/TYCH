@@ -11,6 +11,10 @@ def solo_admin(request):
         return False
     return True
 
+def home(request):
+    from .models import Prenda
+    prendas_destacadas = Prenda.objects.filter(estado='disponible').order_by('-fecha_publicacion')[:6]
+    return render(request, 'catalogo/home.html', {'prendas': prendas_destacadas})
 
 @login_required(login_url='/usuarios/login/')
 def lista_prendas(request):
@@ -87,7 +91,32 @@ def cambiar_estado(request, pk):
 @login_required(login_url='/usuarios/login/')
 def detalle_prenda(request, pk):
     prenda = get_object_or_404(Prenda, pk=pk)
-    return render(request, 'catalogo/detalle_prenda.html', {'prenda': prenda})
+
+    from calificaciones.models import CalificacionPrenda
+    from transacciones.models import Orden
+
+    calificaciones = CalificacionPrenda.objects.filter(
+        prenda=prenda
+    ).select_related('comprador').order_by('-creada_en')
+
+    puede_calificar = False
+    if request.user.is_authenticated and not request.user.perfil == 'administrador':
+        compro = Orden.objects.filter(
+            usuario=request.user, prenda=prenda, estado='aprobada'
+        ).exists()
+        ya_califico = CalificacionPrenda.objects.filter(
+            prenda=prenda, comprador=request.user
+        ).exists()
+        puede_calificar = compro and not ya_califico
+
+    es_admin = request.user.is_authenticated and request.user.perfil == 'administrador'
+
+    return render(request, 'catalogo/detalle_prenda.html', {
+        'prenda'         : prenda,
+        'calificaciones' : calificaciones,
+        'puede_calificar': puede_calificar,
+        'es_admin'       : es_admin,
+    })
 
 @login_required(login_url='/usuarios/login/')
 def lista_prendas(request):

@@ -64,8 +64,7 @@
                                 Comprar ahora
                             </a>
                             {% if not es_admin %}
-                            <a href="/mensajeria/iniciar/{{ prenda.pk }}/"
-                               class="btn btn-outline-dark btn-lg w-100 mt-2">
+                            <a href="/mensajeria/iniciar/{{ prenda.pk }}/" class="btn btn-outline-dark btn-lg w-100 mt-2">
                                 💬 Consultar al vendedor
                             </a>
                             {% endif %}
@@ -74,6 +73,31 @@
                         {% else %}
                             <button class="btn btn-danger btn-lg w-100" disabled>Vendida</button>
                         {% endif %}
+
+                        <!-- Botones calificar -->
+                        {% if puede_calificar %}
+                        <hr>
+                        <a href="/calificaciones/prenda/{{ prenda.pk }}/" class="btn btn-outline-dark btn-sm w-100 mb-2">⭐ Calificar prenda</a>
+                        <a href="/calificaciones/vendedor/{{ prenda.pk }}/" class="btn btn-outline-dark btn-sm w-100">👤 Calificar vendedor</a>
+                        {% endif %}
+
+                        <!-- Calificaciones -->
+                        {% if calificaciones %}
+                        <hr>
+                        <h6 class="fw-bold">Calificaciones ({{ calificaciones|length }})</h6>
+                        {% for cal in calificaciones %}
+                        <div class="mb-2 border-bottom pb-2">
+                            <small class="fw-bold">{{ cal.comprador.get_full_name|default:cal.comprador.username }}</small>
+                            <span class="text-warning ms-1">
+                                {% for i in "12345" %}{% if forloop.counter <= cal.puntuacion %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                            {% if cal.comentario %}
+                            <p class="mb-0 text-muted small">{{ cal.comentario }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
                     </div>
                 </div>
             </div>

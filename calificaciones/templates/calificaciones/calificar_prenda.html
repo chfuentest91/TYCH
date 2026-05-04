@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — Calificar Prenda</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH</a>
+            <a href="/catalogo/detalle/{{ prenda.pk }}/" class="btn btn-outline-light btn-sm">Volver</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5" style="max-width:500px;">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <strong>Calificar prenda</strong>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">{{ prenda.nombre }}</p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Puntuación</label>
+                        <div class="d-flex gap-2">
+                            {% for i in "12345" %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="puntuacion"
+                                       id="p{{ i }}" value="{{ i }}" required>
+                                <label class="form-check-label" for="p{{ i }}">{{ i }}★</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Comentario <small class="text-muted">(opcional)</small></label>
+                        <textarea name="comentario" class="form-control" rows="3"
+                                  placeholder="¿Qué te pareció la prenda?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100">Enviar calificación</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

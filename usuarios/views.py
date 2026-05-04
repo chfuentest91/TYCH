@@ -30,7 +30,7 @@ def login_view(request):
             return redirect('editar_perfil')
         else:
             messages.error(request, 'Usuario o contraseña incorrectos.')
-    return render(request, 'usuarios/login.html')
+    return render(request, 'home.html')
 
 
 def logout_view(request):

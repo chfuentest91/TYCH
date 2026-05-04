@@ -1,0 +1,104 @@
+{% load filtros %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — Venta de ropa usada</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .brand-logo {
+            font-size: 5rem;
+            font-weight: 900;
+            letter-spacing: -4px;
+            color: #212529;
+        }
+        .tagline {
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #6c757d;
+        }
+        .card-prenda:hover {
+            transform: translateY(-4px);
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-white border-bottom shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-black fs-3 fw-bold" href="/">TYCH</a>
+            <div class="d-flex gap-2">
+                <a href="/catalogo/" class="btn btn-outline-dark btn-sm">Prendas</a>
+                {% if user.is_authenticated %}
+                <a href="/usuarios/perfil/" class="btn btn-outline-dark btn-sm">Mi Perfil</a>
+                <a href="/usuarios/logout/" class="btn btn-dark btn-sm">Cerrar Sesión</a>
+                {% else %}
+                <a href="/usuarios/login/" class="btn btn-outline-dark btn-sm">Iniciar Sesión</a>
+                <a href="/usuarios/registro/" class="btn btn-dark btn-sm">Registrarse</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="d-flex flex-column align-items-center justify-content-center text-center py-5 mt-4">
+        <p class="text-muted mb-1" style="letter-spacing:3px;font-size:0.85rem;text-transform:uppercase;">Bienvenido a</p>
+        <div class="brand-logo">TYCH</div>
+        <p class="tagline mt-2">Venta de ropa usada</p>
+        <div class="d-flex gap-3 mt-4">
+            <a href="/catalogo/" class="btn btn-dark btn-lg px-4">Ver prendas</a>
+            {% if not user.is_authenticated %}
+            <a href="/usuarios/registro/" class="btn btn-outline-dark btn-lg px-4">Crear cuenta</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Prendas destacadas -->
+    {% if prendas %}
+    <div class="container pb-5">
+        <h5 class="fw-bold mb-4 text-center text-muted" style="letter-spacing:2px;text-transform:uppercase;">Últimas disponibles</h5>
+        <div class="row">
+            {% for prenda in prendas %}
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm h-100 card-prenda border-0">
+                    {% if prenda.imagen %}
+                    <img src="{{ prenda.imagen.url }}" class="card-img-top" style="height:220px;object-fit:cover;">
+                    {% else %}
+                    <div class="bg-light text-muted text-center py-5 border-bottom">Sin imagen</div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-1">{{ prenda.nombre }}</h6>
+                        <small class="text-muted">{{ prenda.categoria }} · Talla {{ prenda.talla }}</small>
+                        <p class="fs-5 fw-bold mt-2 mb-0">${{ prenda.precio|precio_clp }}</p>
+                    </div>
+                    <div class="card-footer border-0 bg-white">
+                        {% if user.is_authenticated %}
+                        <a href="/catalogo/detalle/{{ prenda.pk }}/" class="btn btn-dark btn-sm w-100">Ver detalle</a>
+                        {% else %}
+                        <a href="/usuarios/login/" class="btn btn-outline-dark btn-sm w-100">Inicia sesión para comprar</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="border-top text-center py-4 mt-auto">
+        <small class="text-muted">© 2026 TYCH — Venta de ropa usada</small>
+    </footer>
+
+</body>
+</html>
