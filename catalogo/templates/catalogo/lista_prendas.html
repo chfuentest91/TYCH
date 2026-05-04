@@ -25,6 +25,7 @@
                 <a href="/envios/mis-envios/" class="btn btn-outline-light btn-sm me-2">Mis Envíos</a>
                 <a href="/transacciones/historial/" class="btn btn-outline-light btn-sm me-2">Mis Compras</a>
                 {% endif %}
+                <a href="/usuarios/logout/" class="btn btn-danger btn-sm">Cerrar Sesión</a>
             </div>
         </div>
     </nav>
@@ -34,46 +35,40 @@
             <div class="card-body">
                 <form method="GET" class="row g-3">
                     <div class="col-md-2">
-                        <input type="text" name="busqueda" class="form-control" placeholder="Buscar prenda..."
-                            value="{{ request.GET.busqueda }}">
+                        <input type="text" name="busqueda" class="form-control" placeholder="Buscar prenda..." value="{{ request.GET.busqueda }}">
                     </div>
                     <div class="col-md-2">
                         <select name="categoria" class="form-control">
                             <option value="">Todas las categorías</option>
                             {% for cat in categorias %}
-                            <option value="{{ cat.id }}" {% if request.GET.categoria==cat.id|stringformat:"s"
-                                %}selected{% endif %}>{{ cat.nombre }}</option>
+                            <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nombre }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-2">
                         <select name="talla" class="form-control">
                             <option value="">Todas las tallas</option>
-                            <option value="XS" {% if request.GET.talla=="XS" %}selected{% endif %}>XS</option>
-                            <option value="S" {% if request.GET.talla=="S" %}selected{% endif %}>S</option>
-                            <option value="M" {% if request.GET.talla=="M" %}selected{% endif %}>M</option>
-                            <option value="L" {% if request.GET.talla=="L" %}selected{% endif %}>L</option>
-                            <option value="XL" {% if request.GET.talla=="XL" %}selected{% endif %}>XL</option>
-                            <option value="XXL" {% if request.GET.talla=="XXL" %}selected{% endif %}>XXL</option>
+                            <option value="XS" {% if request.GET.talla == "XS" %}selected{% endif %}>XS</option>
+                            <option value="S" {% if request.GET.talla == "S" %}selected{% endif %}>S</option>
+                            <option value="M" {% if request.GET.talla == "M" %}selected{% endif %}>M</option>
+                            <option value="L" {% if request.GET.talla == "L" %}selected{% endif %}>L</option>
+                            <option value="XL" {% if request.GET.talla == "XL" %}selected{% endif %}>XL</option>
+                            <option value="XXL" {% if request.GET.talla == "XXL" %}selected{% endif %}>XXL</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <select name="genero" class="form-control">
                             <option value="">Todos los géneros</option>
-                            <option value="hombre" {% if request.GET.genero=="hombre" %}selected{% endif %}>Hombre
-                            </option>
-                            <option value="mujer" {% if request.GET.genero=="mujer" %}selected{% endif %}>Mujer</option>
-                            <option value="unisex" {% if request.GET.genero=="unisex" %}selected{% endif %}>Unisex
-                            </option>
+                            <option value="hombre" {% if request.GET.genero == "hombre" %}selected{% endif %}>Hombre</option>
+                            <option value="mujer" {% if request.GET.genero == "mujer" %}selected{% endif %}>Mujer</option>
+                            <option value="unisex" {% if request.GET.genero == "unisex" %}selected{% endif %}>Unisex</option>
                         </select>
                     </div>
                     <div class="col-md-1">
-                        <input type="number" name="precio_min" class="form-control" placeholder="$ Mín."
-                            value="{{ request.GET.precio_min }}">
+                        <input type="number" name="precio_min" class="form-control" placeholder="$ Mín." value="{{ request.GET.precio_min }}">
                     </div>
                     <div class="col-md-1">
-                        <input type="number" name="precio_max" class="form-control" placeholder="$ Máx."
-                            value="{{ request.GET.precio_max }}">
+                        <input type="number" name="precio_max" class="form-control" placeholder="$ Máx." value="{{ request.GET.precio_max }}">
                     </div>
                     <div class="col-md-1">
                         <button type="submit" class="btn btn-dark w-100">Filtrar</button>
@@ -103,22 +98,16 @@
                         <h5 class="card-title">{{ prenda.nombre }}</h5>
                         <p class="card-text text-muted">{{ prenda.descripcion|truncatewords:10 }}</p>
                         <p><strong>Categoría:</strong> {{ prenda.categoria }}</p>
-                        <p><strong>Talla:</strong> {{ prenda.talla }} | <strong>Género:</strong> {{
-                            prenda.genero|capfirst }}</p>
+                        <p><strong>Talla:</strong> {{ prenda.talla }} | <strong>Género:</strong> {{ prenda.genero|capfirst }}</p>
                         <p class="fs-5 fw-bold text-dark">${{ prenda.precio|precio_clp }}</p>
-                        <span
-                            class="badge {% if prenda.estado == 'disponible' %}bg-success{% elif prenda.estado == 'reservada' %}bg-warning text-dark{% else %}bg-danger{% endif %}">{{
-                            prenda.estado|capfirst }}</span>
+                        <span class="badge {% if prenda.estado == 'disponible' %}bg-success{% elif prenda.estado == 'reservada' %}bg-warning text-dark{% else %}bg-danger{% endif %}">{{ prenda.estado|capfirst }}</span>
                     </div>
                     <div class="card-footer d-flex gap-2 flex-wrap">
                         <a href="/catalogo/detalle/{{ prenda.pk }}/" class="btn btn-sm btn-dark">Ver detalle</a>
                         {% if es_admin %}
-                        <a href="/envios/" class="btn btn-outline-light btn-sm me-2">Envíos</a>
-                        <a href="/inventario/" class="btn btn-outline-light btn-sm me-2">Inventario</a>
-                        <a href="/catalogo/publicar/" class="btn btn-light btn-sm me-2">+ Publicar Prenda</a>
-                        {% else %}
-                        <a href="/envios/mis-envios/" class="btn btn-outline-light btn-sm me-2">Mis Envíos</a>
-                        <a href="/transacciones/historial/" class="btn btn-outline-light btn-sm me-2">Mis Compras</a>
+                        <a href="/catalogo/editar/{{ prenda.pk }}/" class="btn btn-sm btn-outline-dark">Editar</a>
+                        <a href="/catalogo/estado/{{ prenda.pk }}/" class="btn btn-sm btn-outline-warning">Estado</a>
+                        <a href="/catalogo/eliminar/{{ prenda.pk }}/" class="btn btn-sm btn-outline-danger">Eliminar</a>
                         {% endif %}
                     </div>
                 </div>
