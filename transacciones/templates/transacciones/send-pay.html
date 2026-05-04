@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirigiendo a Webpay...</title>
+</head>
+<body onload="document.send_pay_form.submit()">
+    <p style="text-align:center; margin-top:50px; font-family:sans-serif;">
+        Redirigiendo al portal de pago seguro...
+    </p>
+    <form action="{{ transbank.url }}" name="send_pay_form" method="POST">
+        <input type="hidden" name="token_ws" value="{{ transbank.token }}">
+    </form>
+</body>
+</html>

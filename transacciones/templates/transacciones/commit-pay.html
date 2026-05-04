@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — Resultado del pago</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH</a>
+            <a href="/catalogo/" class="btn btn-outline-light btn-sm">Volver al Catálogo</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5" style="max-width:650px;">
+
+        {% if resultado.estado == 'APROBADO' %}
+        <div class="alert alert-success text-center">
+            <h4 class="fw-bold">✅ ¡Pago exitoso!</h4>
+            <p class="mb-0">Tu compra de <strong>{{ resultado.prenda_nombre }}</strong> fue confirmada.</p>
+        </div>
+        <div class="card shadow-sm mt-3">
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td><strong>Estado</strong></td><td><span class="badge bg-success">{{ resultado.estado }}</span></td></tr>
+                    <tr><td><strong>Fecha</strong></td><td>{{ resultado.fecha }}</td></tr>
+                    <tr><td><strong>Tarjeta</strong></td><td>**** **** **** {{ resultado.tarjeta }}</td></tr>
+                    <tr><td><strong>Tipo de pago</strong></td><td>{{ resultado.tipo_pago }}</td></tr>
+                    <tr><td><strong>Monto</strong></td><td class="fw-bold">{{ resultado.monto }}</td></tr>
+                    <tr><td><strong>Comprobante</strong></td><td>{{ resultado.codigo_autorizacion }}</td></tr>
+                    <tr><td><strong>N° Orden</strong></td><td>{{ resultado.buy_order }}</td></tr>
+                </table>
+            </div>
+        </div>
+
+        {% elif resultado.estado == 'RECHAZADO' %}
+        <div class="alert alert-danger text-center">
+            <h4 class="fw-bold">❌ Pago rechazado</h4>
+            <p class="mb-0">{{ resultado.mensaje }}</p>
+        </div>
+
+        {% else %}
+        <div class="alert alert-warning text-center">
+            <h4 class="fw-bold">⚠️ {{ resultado.estado }}</h4>
+            <p class="mb-0">{{ resultado.mensaje }}</p>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="/catalogo/" class="btn btn-dark btn-lg">Volver al catálogo</a>
+        </div>
+    </div>
+</body>
+</html>
