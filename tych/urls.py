@@ -6,7 +6,7 @@ from catalogo.views import home
 
 
 urlpatterns = [
-    path('', home, name='home'),  # ← coma aquí
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('usuarios/', include('usuarios.urls')),
     path('catalogo/', include('catalogo.urls')),

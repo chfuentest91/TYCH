@@ -8,7 +8,7 @@ from .models import CalificacionPrenda, CalificacionVendedor
 
 
 def _verificar_compra(usuario, prenda):
-    """Verifica que el usuario compró la prenda."""
+    #Verifica que el usuario compro la prenda
     return Orden.objects.filter(
         usuario=usuario,
         prenda=prenda,

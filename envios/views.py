@@ -7,7 +7,7 @@ from .models import Envio
 
 @login_required
 def lista_envios(request):
-    """Vista para administrador — lista todos los envíos."""
+    #Vista para administrador / lista todos los envíos#
     if request.user.perfil != 'administrador':
         return render(request, 'envios/sin_acceso.html')
 
@@ -20,7 +20,7 @@ def lista_envios(request):
 
 @login_required
 def actualizar_estado(request, envio_id):
-    """Admin actualiza el estado del envío."""
+    #Admin actualiza el estado del envío#
     if request.user.perfil != 'administrador':
         return render(request, 'envios/sin_acceso.html')
 
@@ -40,7 +40,7 @@ def actualizar_estado(request, envio_id):
 
 @login_required
 def mis_envios(request):
-    """Vista para cliente — ve sus envíos desde su perfil."""
+    #Vista para cliente - ve sus envíos desde su perfil#
     ordenes_ids = Orden.objects.filter(
         usuario=request.user, estado='aprobada'
     ).values_list('id', flat=True)
