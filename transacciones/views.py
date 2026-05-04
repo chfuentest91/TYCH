@@ -108,3 +108,12 @@ def commit_pago(request):
         resultado = {'estado': 'ERROR', 'mensaje': 'Error al confirmar el pago.'}
 
     return render(request, 'transacciones/commit-pay.html', {'resultado': resultado})
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def historial_compras(request):
+    ordenes = Orden.objects.filter(
+        usuario=request.user
+    ).order_by('-fecha_creacion')
+    return render(request, 'transacciones/historial.html', {'ordenes': ordenes})
