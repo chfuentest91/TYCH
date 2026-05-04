@@ -23,12 +23,18 @@ class Prenda(models.Model):
         ('XS', 'XS'), ('S', 'S'), ('M', 'M'),
         ('L', 'L'), ('XL', 'XL'), ('XXL', 'XXL'),
     ]
+    GENERO_CHOICES = [
+        ('hombre', 'Hombre'),
+        ('mujer', 'Mujer'),
+        ('unisex', 'Unisex'),
+    ]
 
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField()
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True)
     talla = models.CharField(max_length=5, choices=TALLA_CHOICES)
+    genero = models.CharField(max_length=10, choices=GENERO_CHOICES, default='unisex')
     estado = models.CharField(max_length=15, choices=ESTADO_CHOICES, default='disponible')
     imagen = models.ImageField(upload_to='prendas/', blank=True, null=True)
     fecha_publicacion = models.DateTimeField(auto_now_add=True)

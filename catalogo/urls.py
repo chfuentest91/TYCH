@@ -7,4 +7,5 @@ urlpatterns = [
     path('editar/<int:pk>/', views.editar_prenda, name='editar_prenda'),
     path('eliminar/<int:pk>/', views.eliminar_prenda, name='eliminar_prenda'),
     path('estado/<int:pk>/', views.cambiar_estado, name='cambiar_estado'),
+    path('detalle/<int:pk>/', views.detalle_prenda, name='detalle_prenda'),
 ]

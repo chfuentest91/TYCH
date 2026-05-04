@@ -20,6 +20,9 @@
                         <h4>Eliminar Prenda</h4>
                     </div>
                     <div class="card-body text-center">
+                        {% if prenda.imagen %}
+                            <img src="{{ prenda.imagen.url }}" style="max-height:150px;" class="img-thumbnail mb-3">
+                        {% endif %}
                         <p class="fs-5">¿Estás seguro que deseas eliminar <strong>{{ prenda.nombre }}</strong>?</p>
                         <p class="text-muted">Esta acción no se puede deshacer.</p>
                         <form method="POST">

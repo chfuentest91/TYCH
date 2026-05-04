@@ -26,6 +26,11 @@
                                 <div class="alert alert-info">{{ message }}</div>
                             {% endfor %}
                         {% endif %}
+                        {% if prenda.imagen %}
+                            <div class="text-center mb-3">
+                                <img src="{{ prenda.imagen.url }}" style="max-height:200px;" class="img-thumbnail">
+                            </div>
+                        {% endif %}
                         <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
                             {% for field in form %}

@@ -33,9 +33,9 @@
                             <div class="mb-3">
                                 <label class="form-label">Nuevo Estado</label>
                                 <select name="estado" class="form-control">
-                                    <option value="disponible">Disponible</option>
-                                    <option value="reservada">Reservada</option>
-                                    <option value="vendida">Vendida</option>
+                                    <option value="disponible" {% if prenda.estado == 'disponible' %}selected{% endif %}>Disponible</option>
+                                    <option value="reservada" {% if prenda.estado == 'reservada' %}selected{% endif %}>Reservada</option>
+                                    <option value="vendida" {% if prenda.estado == 'vendida' %}selected{% endif %}>Vendida</option>
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-dark w-100">Guardar Estado</button>

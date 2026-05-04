@@ -4,7 +4,7 @@ from .models import Prenda, Categoria
 class PrendaForm(forms.ModelForm):
     class Meta:
         model = Prenda
-        fields = ['nombre', 'descripcion', 'precio', 'categoria', 'talla', 'estado', 'imagen']
+        fields = ['nombre', 'descripcion', 'precio', 'categoria', 'talla', 'genero', 'estado', 'imagen']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -13,6 +13,7 @@ class PrendaForm(forms.ModelForm):
         self.fields['precio'].label = 'Precio ($)'
         self.fields['categoria'].label = 'Categoría'
         self.fields['talla'].label = 'Talla'
+        self.fields['genero'].label = 'Género'
         self.fields['estado'].label = 'Estado'
         self.fields['imagen'].label = 'Imagen'
         self.fields['imagen'].required = False

@@ -5,14 +5,26 @@ from .models import Prenda
 from .forms import PrendaForm
 
 
+def solo_admin(request):
+    if request.user.perfil != 'administrador':
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return False
+    return True
+
+
 @login_required(login_url='/usuarios/login/')
 def lista_prendas(request):
     prendas = Prenda.objects.all().order_by('-fecha_publicacion')
-    return render(request, 'catalogo/lista_prendas.html', {'prendas': prendas})
+    return render(request, 'catalogo/lista_prendas.html', {
+        'prendas': prendas,
+        'es_admin': request.user.perfil == 'administrador'
+    })
 
 
 @login_required(login_url='/usuarios/login/')
 def publicar_prenda(request):
+    if not solo_admin(request):
+        return redirect('lista_prendas')
     if request.method == 'POST':
         form = PrendaForm(request.POST, request.FILES)
         if form.is_valid():
@@ -30,6 +42,8 @@ def publicar_prenda(request):
 
 @login_required(login_url='/usuarios/login/')
 def editar_prenda(request, pk):
+    if not solo_admin(request):
+        return redirect('lista_prendas')
     prenda = get_object_or_404(Prenda, pk=pk)
     if request.method == 'POST':
         form = PrendaForm(request.POST, request.FILES, instance=prenda)
@@ -46,6 +60,8 @@ def editar_prenda(request, pk):
 
 @login_required(login_url='/usuarios/login/')
 def eliminar_prenda(request, pk):
+    if not solo_admin(request):
+        return redirect('lista_prendas')
     prenda = get_object_or_404(Prenda, pk=pk)
     if request.method == 'POST':
         prenda.delete()
@@ -56,6 +72,8 @@ def eliminar_prenda(request, pk):
 
 @login_required(login_url='/usuarios/login/')
 def cambiar_estado(request, pk):
+    if not solo_admin(request):
+        return redirect('lista_prendas')
     prenda = get_object_or_404(Prenda, pk=pk)
     if request.method == 'POST':
         nuevo_estado = request.POST.get('estado')
@@ -65,3 +83,40 @@ def cambiar_estado(request, pk):
             messages.success(request, f'Estado cambiado a {nuevo_estado}.')
         return redirect('lista_prendas')
     return render(request, 'catalogo/cambiar_estado.html', {'prenda': prenda})
+
+@login_required(login_url='/usuarios/login/')
+def detalle_prenda(request, pk):
+    prenda = get_object_or_404(Prenda, pk=pk)
+    return render(request, 'catalogo/detalle_prenda.html', {'prenda': prenda})
+
+@login_required(login_url='/usuarios/login/')
+def lista_prendas(request):
+    from .models import Categoria
+    prendas = Prenda.objects.all().order_by('-fecha_publicacion')
+    categorias = Categoria.objects.all()
+
+    categoria_id = request.GET.get('categoria')
+    talla = request.GET.get('talla')
+    precio_min = request.GET.get('precio_min')
+    precio_max = request.GET.get('precio_max')
+    busqueda = request.GET.get('busqueda')
+    genero = request.GET.get('genero')
+
+    if categoria_id:
+        prendas = prendas.filter(categoria_id=categoria_id)
+    if talla:
+        prendas = prendas.filter(talla=talla)
+    if precio_min:
+        prendas = prendas.filter(precio__gte=precio_min)
+    if precio_max:
+        prendas = prendas.filter(precio__lte=precio_max)
+    if busqueda:
+        prendas = prendas.filter(nombre__icontains=busqueda)
+    if genero:
+        prendas = prendas.filter(genero=genero)
+
+    return render(request, 'catalogo/lista_prendas.html', {
+        'prendas': prendas,
+        'categorias': categorias,
+        'es_admin': request.user.perfil == 'administrador'
+    })
