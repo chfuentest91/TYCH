@@ -59,14 +59,22 @@
                         </table>
                         <hr>
                         <p class="fs-2 fw-bold text-dark">${{ prenda.precio|precio_clp }}</p>
+
                         {% if prenda.estado == 'disponible' %}
-                            <a href="/transacciones/comprar/{{ prenda.pk }}/" class="btn btn-dark btn-lg w-100">
-                                Comprar ahora
-                            </a>
-                            {% if not es_admin %}
-                            <a href="/mensajeria/iniciar/{{ prenda.pk }}/" class="btn btn-outline-dark btn-lg w-100 mt-2">
-                                💬 Consultar al vendedor
-                            </a>
+                            {% if user.is_authenticated %}
+                                <a href="/transacciones/comprar/{{ prenda.pk }}/" class="btn btn-dark btn-lg w-100">
+                                    Comprar ahora
+                                </a>
+                                {% if not es_admin %}
+                                <a href="/mensajeria/iniciar/{{ prenda.pk }}/" class="btn btn-outline-dark btn-lg w-100 mt-2">
+                                    💬 Consultar al vendedor
+                                </a>
+                                {% endif %}
+                            {% else %}
+                                <a href="/usuarios/registro/?next=/transacciones/comprar/{{ prenda.pk }}/" class="btn btn-dark btn-lg w-100">
+                                    Comprar ahora
+                                </a>
+                                <p class="text-muted text-center mt-2 small">Necesitas una cuenta para comprar</p>
                             {% endif %}
                         {% elif prenda.estado == 'reservada' %}
                             <button class="btn btn-warning btn-lg w-100" disabled>Reservada</button>

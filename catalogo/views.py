@@ -11,17 +11,43 @@ def solo_admin(request):
         return False
     return True
 
+
 def home(request):
-    from .models import Prenda
     prendas_destacadas = Prenda.objects.filter(estado='disponible').order_by('-fecha_publicacion')[:6]
     return render(request, 'catalogo/home.html', {'prendas': prendas_destacadas})
 
-@login_required(login_url='/usuarios/login/')
+
 def lista_prendas(request):
+    from .models import Categoria
     prendas = Prenda.objects.all().order_by('-fecha_publicacion')
+    categorias = Categoria.objects.all()
+
+    categoria_id = request.GET.get('categoria')
+    talla        = request.GET.get('talla')
+    precio_min   = request.GET.get('precio_min')
+    precio_max   = request.GET.get('precio_max')
+    busqueda     = request.GET.get('busqueda')
+    genero       = request.GET.get('genero')
+
+    if categoria_id:
+        prendas = prendas.filter(categoria_id=categoria_id)
+    if talla:
+        prendas = prendas.filter(talla=talla)
+    if precio_min:
+        prendas = prendas.filter(precio__gte=precio_min)
+    if precio_max:
+        prendas = prendas.filter(precio__lte=precio_max)
+    if busqueda:
+        prendas = prendas.filter(nombre__icontains=busqueda)
+    if genero:
+        prendas = prendas.filter(genero=genero)
+
+    es_admin = request.user.is_authenticated and request.user.perfil == 'administrador'
+
     return render(request, 'catalogo/lista_prendas.html', {
-        'prendas': prendas,
-        'es_admin': request.user.perfil == 'administrador'
+        'prendas'   : prendas,
+        'categorias': categorias,
+        'es_admin'  : es_admin,
     })
 
 
@@ -88,7 +114,7 @@ def cambiar_estado(request, pk):
         return redirect('lista_prendas')
     return render(request, 'catalogo/cambiar_estado.html', {'prenda': prenda})
 
-@login_required(login_url='/usuarios/login/')
+
 def detalle_prenda(request, pk):
     prenda = get_object_or_404(Prenda, pk=pk)
 
@@ -100,7 +126,7 @@ def detalle_prenda(request, pk):
     ).select_related('comprador').order_by('-creada_en')
 
     puede_calificar = False
-    if request.user.is_authenticated and not request.user.perfil == 'administrador':
+    if request.user.is_authenticated and request.user.perfil != 'administrador':
         compro = Orden.objects.filter(
             usuario=request.user, prenda=prenda, estado='aprobada'
         ).exists()
@@ -116,36 +142,4 @@ def detalle_prenda(request, pk):
         'calificaciones' : calificaciones,
         'puede_calificar': puede_calificar,
         'es_admin'       : es_admin,
-    })
-
-@login_required(login_url='/usuarios/login/')
-def lista_prendas(request):
-    from .models import Categoria
-    prendas = Prenda.objects.all().order_by('-fecha_publicacion')
-    categorias = Categoria.objects.all()
-
-    categoria_id = request.GET.get('categoria')
-    talla = request.GET.get('talla')
-    precio_min = request.GET.get('precio_min')
-    precio_max = request.GET.get('precio_max')
-    busqueda = request.GET.get('busqueda')
-    genero = request.GET.get('genero')
-
-    if categoria_id:
-        prendas = prendas.filter(categoria_id=categoria_id)
-    if talla:
-        prendas = prendas.filter(talla=talla)
-    if precio_min:
-        prendas = prendas.filter(precio__gte=precio_min)
-    if precio_max:
-        prendas = prendas.filter(precio__lte=precio_max)
-    if busqueda:
-        prendas = prendas.filter(nombre__icontains=busqueda)
-    if genero:
-        prendas = prendas.filter(genero=genero)
-
-    return render(request, 'catalogo/lista_prendas.html', {
-        'prendas': prendas,
-        'categorias': categorias,
-        'es_admin': request.user.perfil == 'administrador'
     })
