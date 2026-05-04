@@ -1,0 +1,176 @@
+{% load filtros %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — Inventario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH — Inventario</a>
+            <a href="/catalogo/" class="btn btn-outline-light btn-sm">Volver al Catálogo</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm border-0">
+                    <div class="card-body">
+                        <h2 class="fw-bold">{{ total }}</h2>
+                        <p class="text-muted mb-0">Total prendas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm border-0 border-start border-success border-4">
+                    <div class="card-body">
+                        <h2 class="fw-bold text-success">{{ disponibles }}</h2>
+                        <p class="text-muted mb-0">Disponibles</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm border-0 border-start border-danger border-4">
+                    <div class="card-body">
+                        <h2 class="fw-bold text-danger">{{ vendidas }}</h2>
+                        <p class="text-muted mb-0">Vendidas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm border-0 border-start border-warning border-4">
+                    <div class="card-body">
+                        <h2 class="fw-bold text-warning">{{ reservadas }}</h2>
+                        <p class="text-muted mb-0">Reservadas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <select name="categoria" class="form-control">
+                            <option value="">Todas las categorías</option>
+                            {% for cat in categorias %}
+                            <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="estado" class="form-control">
+                            <option value="">Todos los estados</option>
+                            <option value="disponible" {% if request.GET.estado == "disponible" %}selected{% endif %}>Disponible</option>
+                            <option value="vendida"    {% if request.GET.estado == "vendida"    %}selected{% endif %}>Vendida</option>
+                            <option value="reservada"  {% if request.GET.estado == "reservada"  %}selected{% endif %}>Reservada</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="/inventario/" class="btn btn-outline-secondary w-100">Limpiar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla de prendas -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white">
+                <strong>Prendas ({{ prendas|length }})</strong>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Talla</th>
+                                <th>Precio</th>
+                                <th>Estado</th>
+                                <th>Publicado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prenda in prendas %}
+                            <tr>
+                                <td>{{ prenda.pk }}</td>
+                                <td>{{ prenda.nombre }}</td>
+                                <td>{{ prenda.categoria }}</td>
+                                <td>{{ prenda.talla }}</td>
+                                <td>${{ prenda.precio|precio_clp }}</td>
+                                <td>
+                                    {% if prenda.estado == 'disponible' %}
+                                        <span class="badge bg-success">Disponible</span>
+                                    {% elif prenda.estado == 'vendida' %}
+                                        <span class="badge bg-danger">Vendida</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Reservada</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ prenda.fecha_publicacion|date:"d/m/Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="7" class="text-center text-muted py-3">No hay prendas con esos filtros.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimos movimientos -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <strong>Últimos movimientos</strong>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Prenda</th>
+                                <th>Descripción</th>
+                                <th>Registrado por</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mov in movimientos %}
+                            <tr>
+                                <td>{{ mov.fecha|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if mov.tipo == 'entrada' %}
+                                        <span class="badge bg-success">Entrada</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Salida</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ mov.prenda.nombre }}</td>
+                                <td>{{ mov.descripcion|default:"—" }}</td>
+                                <td>{{ mov.registrado_por.username|default:"—" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted py-3">No hay movimientos registrados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
