@@ -86,7 +86,7 @@
         <!-- Tabla de prendas -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-dark text-white">
-                <strong>Prendas ({{ prendas|length }})</strong>
+                <strong>Prendas ({{ prendas_con_venta|length }})</strong>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -100,29 +100,45 @@
                                 <th>Precio</th>
                                 <th>Estado</th>
                                 <th>Publicado</th>
+                                <th>Comprador</th>
+                                <th>Fecha venta</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for prenda in prendas %}
+                            {% for item in prendas_con_venta %}
                             <tr>
-                                <td>{{ prenda.pk }}</td>
-                                <td>{{ prenda.nombre }}</td>
-                                <td>{{ prenda.categoria }}</td>
-                                <td>{{ prenda.talla }}</td>
-                                <td>${{ prenda.precio|precio_clp }}</td>
+                                <td>{{ item.prenda.pk }}</td>
+                                <td>{{ item.prenda.nombre }}</td>
+                                <td>{{ item.prenda.categoria }}</td>
+                                <td>{{ item.prenda.talla }}</td>
+                                <td>${{ item.prenda.precio|precio_clp }}</td>
                                 <td>
-                                    {% if prenda.estado == 'disponible' %}
+                                    {% if item.prenda.estado == 'disponible' %}
                                         <span class="badge bg-success">Disponible</span>
-                                    {% elif prenda.estado == 'vendida' %}
+                                    {% elif item.prenda.estado == 'vendida' %}
                                         <span class="badge bg-danger">Vendida</span>
                                     {% else %}
                                         <span class="badge bg-warning text-dark">Reservada</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ prenda.fecha_publicacion|date:"d/m/Y" }}</td>
+                                <td>{{ item.prenda.fecha_publicacion|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% if item.orden %}
+                                        {{ item.orden.usuario.get_full_name|default:item.orden.usuario.username }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.orden.fecha_pago %}
+                                        {{ item.orden.fecha_pago|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="7" class="text-center text-muted py-3">No hay prendas con esos filtros.</td></tr>
+                            <tr><td colspan="9" class="text-center text-muted py-3">No hay prendas con esos filtros.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
