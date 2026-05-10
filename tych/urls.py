@@ -15,4 +15,5 @@ urlpatterns = [
     path('envios/', include('envios.urls')),
     path('mensajeria/', include('mensajeria.urls')),
     path('calificaciones/', include('calificaciones.urls')),
+    path('carrito/', include('carrito.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

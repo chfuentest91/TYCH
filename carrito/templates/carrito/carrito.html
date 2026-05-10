@@ -1,0 +1,160 @@
+{% load filtros %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH — Mi Carrito</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH — Carrito</a>
+            <a href="/catalogo/" class="btn btn-outline-light btn-sm">Seguir comprando</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Items del carrito -->
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <strong>🛒 Mis prendas ({{ carrito.cantidad_items }})</strong>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if items %}
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Prenda</th>
+                                    <th>Talla</th>
+                                    <th class="text-end">Precio</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if item.prenda.imagen %}
+                                            <img src="{{ item.prenda.imagen.url }}" width="50" height="50" style="object-fit:cover;" class="rounded">
+                                            {% endif %}
+                                            <span>{{ item.prenda.nombre }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ item.prenda.talla }}</td>
+                                    <td class="text-end fw-bold">${{ item.prenda.precio|precio_clp }}</td>
+                                    <td class="text-end">
+                                        <a href="/carrito/eliminar/{{ item.id }}/" class="btn btn-sm btn-outline-danger">✕</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="text-center text-muted py-4">Tu carrito está vacío.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Opciones de despacho -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <strong>🚚 Opciones de despacho</strong>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/carrito/despacho/">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                {% for opcion in opciones %}
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3 {% if despacho_sel.id == opcion.id %}border-dark bg-light{% endif %}">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="despacho_id"
+                                                   id="op{{ opcion.id }}" value="{{ opcion.id }}"
+                                                   {% if despacho_sel.id == opcion.id %}checked{% endif %}>
+                                            <label class="form-check-label fw-bold" for="op{{ opcion.id }}">
+                                                {{ opcion.nombre }}
+                                            </label>
+                                        </div>
+                                        <p class="mb-0 text-muted small mt-1">
+                                            {% if opcion.precio == 0 %}
+                                                <span class="text-success fw-bold">Gratis</span>
+                                            {% else %}
+                                                ${{ opcion.precio|precio_clp }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-outline-dark btn-sm mt-3">Aplicar despacho</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen del pedido -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <strong>Resumen del pedido</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal prendas</span>
+                            <span>${{ total_prendas|precio_clp }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Despacho</span>
+                            <span>
+                                {% if costo_despacho == 0 %}
+                                    {% if despacho_sel %}
+                                        <span class="text-success">Gratis</span>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                {% else %}
+                                    ${{ costo_despacho|precio_clp }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+                            <span>Total</span>
+                            <span>${{ total_final|precio_clp }}</span>
+                        </div>
+
+                        {% if items and despacho_sel %}
+                        <a href="/carrito/pagar/" class="btn btn-dark w-100 btn-lg">
+                            💳 Pagar con Webpay
+                        </a>
+                        {% elif items %}
+                        <button class="btn btn-secondary w-100 btn-lg" disabled>
+                            Selecciona un despacho
+                        </button>
+                        {% else %}
+                        <button class="btn btn-secondary w-100 btn-lg" disabled>
+                            Carrito vacío
+                        </button>
+                        {% endif %}
+
+                        <a href="/transacciones/historial/" class="btn btn-outline-dark w-100 mt-2 btn-sm">
+                            Ver mis compras anteriores
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

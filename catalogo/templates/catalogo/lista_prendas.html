@@ -22,6 +22,12 @@
                 <a href="/inventario/" class="btn btn-outline-light btn-sm me-2">Inventario</a>
                 <a href="/catalogo/publicar/" class="btn btn-light btn-sm me-2">+ Publicar Prenda</a>
                 {% else %}
+                <a href="/carrito/" class="btn btn-outline-light btn-sm me-2">
+                    🛒 Carrito
+                    {% if user.is_authenticated %}
+                    ({{ user.carrito.cantidad_items }})
+                    {% endif %}
+                </a>
                 <a href="/mensajeria/mis-mensajes/" class="btn btn-outline-light btn-sm me-2">Mensajes</a>
                 <a href="/envios/mis-envios/" class="btn btn-outline-light btn-sm me-2">Mis Envíos</a>
                 <a href="/transacciones/historial/" class="btn btn-outline-light btn-sm me-2">Mis Compras</a>
@@ -105,6 +111,9 @@
                     </div>
                     <div class="card-footer d-flex gap-2 flex-wrap">
                         <a href="/catalogo/detalle/{{ prenda.pk }}/" class="btn btn-sm btn-dark">Ver detalle</a>
+                        {% if not es_admin and prenda.estado == 'disponible' %}
+                        <a href="/carrito/agregar/{{ prenda.pk }}/" class="btn btn-sm btn-outline-dark">🛒 Agregar</a>
+                        {% endif %}
                         {% if es_admin %}
                         <a href="/catalogo/editar/{{ prenda.pk }}/" class="btn btn-sm btn-outline-dark">Editar</a>
                         <a href="/catalogo/estado/{{ prenda.pk }}/" class="btn btn-sm btn-outline-warning">Estado</a>

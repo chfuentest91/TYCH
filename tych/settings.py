@@ -46,6 +46,9 @@ INSTALLED_APPS = INSTALLED_APPS = INSTALLED_APPS = [
     'envios',
     'mensajeria',
     'calificaciones',
+    'carrito',
+
+
 ]
 
 MIDDLEWARE = [
