@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TYCH — Mi Carrito</title>
+    <title>TYCH - Mi Carrito</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <nav class="navbar navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand fw-bold">TYCH — Carrito</a>
+            <a class="navbar-brand fw-bold">TYCH - Carrito</a>
             <a href="/catalogo/" class="btn btn-outline-light btn-sm">Seguir comprando</a>
         </div>
     </nav>
@@ -66,39 +66,35 @@
                     </div>
                 </div>
 
-                <!-- Opciones de despacho -->
+                <!-- Despacho seleccionado -->
                 <div class="card shadow-sm">
-                    <div class="card-header bg-dark text-white">
-                        <strong>🚚 Opciones de despacho</strong>
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <strong>Despacho</strong>
+                        <a href="/carrito/despacho/" class="btn btn-outline-light btn-sm">
+                            {% if despacho_info %}Cambiar{% else %}Seleccionar{% endif %}
+                        </a>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="/carrito/despacho/">
-                            {% csrf_token %}
-                            <div class="row g-3">
-                                {% for opcion in opciones %}
-                                <div class="col-md-6">
-                                    <div class="border rounded p-3 {% if despacho_sel.id == opcion.id %}border-dark bg-light{% endif %}">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="despacho_id"
-                                                   id="op{{ opcion.id }}" value="{{ opcion.id }}"
-                                                   {% if despacho_sel.id == opcion.id %}checked{% endif %}>
-                                            <label class="form-check-label fw-bold" for="op{{ opcion.id }}">
-                                                {{ opcion.nombre }}
-                                            </label>
-                                        </div>
-                                        <p class="mb-0 text-muted small mt-1">
-                                            {% if opcion.precio == 0 %}
-                                                <span class="text-success fw-bold">Gratis</span>
-                                            {% else %}
-                                                ${{ opcion.precio|precio_clp }}
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            <button type="submit" class="btn btn-outline-dark btn-sm mt-3">Aplicar despacho</button>
-                        </form>
+                        {% if despacho_info %}
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-bold">{{ despacho_info.nombre }}</span>
+                            <span class="fw-bold">
+                                {% if despacho_info.precio == 0 %}
+                                    <span class="text-success">Gratis</span>
+                                {% else %}
+                                    ${{ despacho_info.precio|precio_clp }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <p class="text-muted small mb-1">{{ despacho_info.region }}</p>
+                        <p class="text-muted small mb-0">{{ despacho_info.direccion }}</p>
+                        {% else %}
+                        <p class="text-muted mb-0 text-center">
+                            <a href="/carrito/despacho/" class="btn btn-outline-dark btn-sm w-100">
+                                Seleccionar método de despacho →
+                            </a>
+                        </p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -117,14 +113,14 @@
                         <div class="d-flex justify-content-between mb-2">
                             <span>Despacho</span>
                             <span>
-                                {% if costo_despacho == 0 %}
-                                    {% if despacho_sel %}
+                                {% if despacho_info %}
+                                    {% if despacho_info.precio == 0 %}
                                         <span class="text-success">Gratis</span>
                                     {% else %}
-                                        <span class="text-muted">—</span>
+                                        ${{ costo_despacho|precio_clp }}
                                     {% endif %}
                                 {% else %}
-                                    ${{ costo_despacho|precio_clp }}
+                                    <span class="text-muted">—</span>
                                 {% endif %}
                             </span>
                         </div>
@@ -134,14 +130,14 @@
                             <span>${{ total_final|precio_clp }}</span>
                         </div>
 
-                        {% if items and despacho_sel %}
+                        {% if items and despacho_info %}
                         <a href="/carrito/pagar/" class="btn btn-dark w-100 btn-lg">
-                            💳 Pagar con Webpay
+                            Pagar con Webpay
                         </a>
                         {% elif items %}
-                        <button class="btn btn-secondary w-100 btn-lg" disabled>
-                            Selecciona un despacho
-                        </button>
+                        <a href="/carrito/despacho/" class="btn btn-outline-dark w-100 btn-lg">
+                            Seleccionar despacho →
+                        </a>
                         {% else %}
                         <button class="btn btn-secondary w-100 btn-lg" disabled>
                             Carrito vacío

@@ -15,7 +15,7 @@
                 <a href="/catalogo/" class="btn btn-outline-light btn-sm me-2">Volver al Catálogo</a>
                 {% if user.is_authenticated and not es_admin %}
                 <a href="/carrito/" class="btn btn-outline-light btn-sm">
-                    🛒 Carrito ({{ user.carrito.cantidad_items }})
+                    Carrito ({{ user.carrito.cantidad_items }})
                 </a>
                 {% endif %}
             </div>
@@ -71,15 +71,15 @@
                             {% if user.is_authenticated %}
                                 {% if not es_admin %}
                                 <a href="/carrito/agregar/{{ prenda.pk }}/" class="btn btn-dark btn-lg w-100">
-                                    🛒 Agregar al carrito
+                                    Agregar al carrito
                                 </a>
                                 <a href="/mensajeria/iniciar/{{ prenda.pk }}/" class="btn btn-outline-dark btn-lg w-100 mt-2">
-                                    💬 Consultar al vendedor
+                                    Consultar al vendedor
                                 </a>
                                 {% endif %}
                             {% else %}
                                 <a href="/usuarios/registro/?next=/carrito/agregar/{{ prenda.pk }}/" class="btn btn-dark btn-lg w-100">
-                                    🛒 Agregar al carrito
+                                    Agregar al carrito
                                 </a>
                                 <p class="text-muted text-center mt-2 small">Necesitas una cuenta para comprar</p>
                             {% endif %}
@@ -92,8 +92,31 @@
                         <!-- Botones calificar -->
                         {% if puede_calificar %}
                         <hr>
-                        <a href="/calificaciones/prenda/{{ prenda.pk }}/" class="btn btn-outline-dark btn-sm w-100 mb-2">⭐ Calificar prenda</a>
-                        <a href="/calificaciones/vendedor/{{ prenda.pk }}/" class="btn btn-outline-dark btn-sm w-100">👤 Calificar vendedor</a>
+                        <a href="/calificaciones/prenda/{{ prenda.pk }}/" class="btn btn-outline-dark btn-sm w-100 mb-2">Calificar prenda</a>
+                        <a href="/calificaciones/vendedor/{{ prenda.pk }}/" class="btn btn-outline-dark btn-sm w-100">Calificar vendedor</a>
                         {% endif %}
 
-                        <!-- Calificac
+                        <!-- Calificaciones -->
+                        {% if calificaciones %}
+                        <hr>
+                        <h6 class="fw-bold">Calificaciones ({{ calificaciones|length }})</h6>
+                        {% for cal in calificaciones %}
+                        <div class="mb-2 border-bottom pb-2">
+                            <small class="fw-bold">{{ cal.comprador.get_full_name|default:cal.comprador.username }}</small>
+                            <span class="text-warning ms-1">
+                                {% for i in "12345" %}{% if forloop.counter <= cal.puntuacion %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                            {% if cal.comentario %}
+                            <p class="mb-0 text-muted small">{{ cal.comentario }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,134 @@
+{% load filtros %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYCH - Seleccionar Despacho</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold">TYCH - Despacho</a>
+            <a href="/carrito/" class="btn btn-outline-light btn-sm">Volver al carrito</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4" style="max-width:650px;">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-danger">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <strong>Seleccionar método de despacho</strong>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="despacho-form">
+                    {% csrf_token %}
+
+                    <!-- Región -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">1. Selecciona tu región</label>
+                        <select name="region" id="region" class="form-select" required onchange="actualizarPrecios()">
+                            <option value="">-- Selecciona una región --</option>
+                            {% for region in regiones %}
+                            <option value="{{ region }}" {% if despacho_info.region == region %}selected{% endif %}>{{ region }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Dirección -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">2. Ingresa tu dirección de entrega</label>
+                        <input type="text" name="direccion" class="form-control"
+                               placeholder="Ej: Av. Providencia 1234, Depto 5, Santiago"
+                               value="{{ despacho_info.direccion|default:'' }}" required>
+                        <small class="text-muted">Calle, número, departamento o casa, ciudad.</small>
+                    </div>
+
+                    <!-- Método de despacho -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">3. Elige el método de envío</label>
+                        <div id="opciones-despacho" class="row g-3">
+                            {% for opcion in opciones %}
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 opcion-card {% if despacho_info.tipo == opcion.tipo %}border-dark bg-light{% endif %}"
+                                     id="card-{{ opcion.tipo }}">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="tipo"
+                                               id="op-{{ opcion.tipo }}" value="{{ opcion.tipo }}"
+                                               {% if despacho_info.tipo == opcion.tipo %}checked{% endif %}
+                                               onchange="resaltarCard('{{ opcion.tipo }}')">
+                                        <label class="form-check-label" for="op-{{ opcion.tipo }}">
+                                            <strong>{{ opcion.nombre }}</strong>
+                                        </label>
+                                    </div>
+                                    <p class="mb-0 mt-2">
+                                        <span id="precio-{{ opcion.tipo }}" class="fw-bold text-dark fs-5">
+                                            {% if opcion.tipo == 'retiro' %}
+                                                <span class="text-success">Gratis</span>
+                                            {% else %}
+                                                Selecciona región
+                                            {% endif %}
+                                        </span>
+                                    </p>
+                                    {% if opcion.tipo == 'retiro' %}
+                                    <small class="text-muted">Coordinar retiro con el vendedor</small>
+                                    {% else %}
+                                    <small class="text-muted">Entrega 1-5 días hábiles</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 btn-lg">
+                        Confirmar despacho →
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tarifas = {
+            'retiro':      { {% for r in regiones %}'{{ r }}': 0,{% endfor %} },
+            'chilexpress': { {% for r in regiones %}'{{ r }}': {{ tarifas.chilexpress|get_item:r|default:0 }},{% endfor %} },
+            'starken':     { {% for r in regiones %}'{{ r }}': {{ tarifas.starken|get_item:r|default:0 }},{% endfor %} },
+            'blueexpress': { {% for r in regiones %}'{{ r }}': {{ tarifas.blueexpress|get_item:r|default:0 }},{% endfor %} },
+        };
+
+        function formatCLP(n) {
+            return '$' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function actualizarPrecios() {
+            const region = document.getElementById('region').value;
+            if (!region) return;
+            ['chilexpress', 'starken', 'blueexpress'].forEach(tipo => {
+                const precio = tarifas[tipo][region] || 0;
+                document.getElementById('precio-' + tipo).innerHTML =
+                    `<span class="text-dark">${formatCLP(precio)}</span>`;
+            });
+        }
+
+        function resaltarCard(tipo) {
+            document.querySelectorAll('.opcion-card').forEach(c => {
+                c.classList.remove('border-dark', 'bg-light');
+            });
+            document.getElementById('card-' + tipo).classList.add('border-dark', 'bg-light');
+        }
+
+        // Si ya hay región seleccionada al cargar
+        window.onload = function() {
+            const region = document.getElementById('region').value;
+            if (region) actualizarPrecios();
+        };
+    </script>
+</body>
+</html>

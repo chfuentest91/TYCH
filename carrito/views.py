@@ -8,6 +8,80 @@ from tych import transbank_service
 from .models import Carrito, ItemCarrito, OpcionDespacho
 import datetime as dt
 
+# ── Tarifas por región ──────────────────────────────────────────────
+REGIONES = [
+    "Región Metropolitana",
+    "Valparaíso",
+    "O'Higgins",
+    "Maule",
+    "Biobío",
+    "Araucanía",
+    "Los Lagos",
+    "Antofagasta",
+    "Atacama",
+    "Coquimbo",
+    "Tarapacá",
+    "Arica y Parinacota",
+    "Los Ríos",
+    "Aysén",
+    "Magallanes",
+]
+
+TARIFAS = {
+    'retiro': {r: 0 for r in REGIONES},
+    'chilexpress': {
+        "Región Metropolitana": 3990,
+        "Valparaíso":           4490,
+        "O'Higgins":            4490,
+        "Maule":                4990,
+        "Biobío":               4990,
+        "Araucanía":            5490,
+        "Los Lagos":            5990,
+        "Antofagasta":          5490,
+        "Atacama":              5490,
+        "Coquimbo":             4990,
+        "Tarapacá":             5990,
+        "Arica y Parinacota":   6490,
+        "Los Ríos":             5990,
+        "Aysén":                7490,
+        "Magallanes":           7990,
+    },
+    'starken': {
+        "Región Metropolitana": 3500,
+        "Valparaíso":           3990,
+        "O'Higgins":            3990,
+        "Maule":                4490,
+        "Biobío":               4490,
+        "Araucanía":            4990,
+        "Los Lagos":            5490,
+        "Antofagasta":          4990,
+        "Atacama":              4990,
+        "Coquimbo":             4490,
+        "Tarapacá":             5490,
+        "Arica y Parinacota":   5990,
+        "Los Ríos":             5490,
+        "Aysén":                6990,
+        "Magallanes":           7490,
+    },
+    'blueexpress': {
+        "Región Metropolitana": 3200,
+        "Valparaíso":           3690,
+        "O'Higgins":            3690,
+        "Maule":                4190,
+        "Biobío":               4190,
+        "Araucanía":            4690,
+        "Los Lagos":            5190,
+        "Antofagasta":          4690,
+        "Atacama":              4690,
+        "Coquimbo":             4190,
+        "Tarapacá":             5190,
+        "Arica y Parinacota":   5690,
+        "Los Ríos":             5190,
+        "Aysén":                6690,
+        "Magallanes":           6990,
+    },
+}
+
 
 def _get_or_create_carrito(usuario):
     carrito, _ = Carrito.objects.get_or_create(usuario=usuario)
@@ -16,29 +90,25 @@ def _get_or_create_carrito(usuario):
 
 @login_required
 def ver_carrito(request):
-    carrito    = _get_or_create_carrito(request.user)
-    items      = carrito.items.select_related('prenda').all()
-    opciones   = OpcionDespacho.objects.filter(activo=True)
-    despacho_id = request.session.get('despacho_id')
-    despacho_sel = None
-    if despacho_id:
-        try:
-            despacho_sel = OpcionDespacho.objects.get(id=despacho_id)
-        except OpcionDespacho.DoesNotExist:
-            pass
+    carrito     = _get_or_create_carrito(request.user)
+    items       = carrito.items.select_related('prenda').all()
+    opciones    = OpcionDespacho.objects.filter(activo=True)
+
+    despacho_info = request.session.get('despacho_info')
+    costo_despacho = 0
+    if despacho_info:
+        costo_despacho = despacho_info.get('precio', 0)
 
     total_prendas = carrito.total()
-    costo_despacho = despacho_sel.precio if despacho_sel else 0
-    total_final    = int(total_prendas) + costo_despacho
+    total_final   = int(total_prendas) + costo_despacho
 
     return render(request, 'carrito/carrito.html', {
-        'carrito'       : carrito,
-        'items'         : items,
-        'opciones'      : opciones,
-        'despacho_sel'  : despacho_sel,
-        'total_prendas' : total_prendas,
-        'costo_despacho': costo_despacho,
-        'total_final'   : total_final,
+        'carrito'        : carrito,
+        'items'          : items,
+        'despacho_info'  : despacho_info,
+        'total_prendas'  : total_prendas,
+        'costo_despacho' : costo_despacho,
+        'total_final'    : total_final,
     })
 
 
@@ -47,8 +117,7 @@ def agregar_item(request, prenda_id):
     prenda  = get_object_or_404(Prenda, id=prenda_id, estado='disponible')
     carrito = _get_or_create_carrito(request.user)
 
-    # Verificar que no esté ya en otro carrito
-    if ItemCarrito.objects.filter(prenda=prenda).exists():
+    if ItemCarrito.objects.filter(prenda=prenda).exclude(carrito=carrito).exists():
         messages.warning(request, f'"{prenda.nombre}" ya está reservada por otro cliente.')
         return redirect(f'/catalogo/detalle/{prenda_id}/')
 
@@ -65,7 +134,7 @@ def agregar_item(request, prenda_id):
 
 @login_required
 def eliminar_item(request, item_id):
-    item = get_object_or_404(ItemCarrito, id=item_id, carrito__usuario=request.user)
+    item   = get_object_or_404(ItemCarrito, id=item_id, carrito__usuario=request.user)
     prenda = item.prenda
     item.delete()
     prenda.estado = 'disponible'
@@ -76,10 +145,40 @@ def eliminar_item(request, item_id):
 
 @login_required
 def seleccionar_despacho(request):
+    opciones = OpcionDespacho.objects.filter(activo=True)
+
     if request.method == 'POST':
-        despacho_id = request.POST.get('despacho_id')
-        request.session['despacho_id'] = int(despacho_id)
-    return redirect('/carrito/')
+        tipo      = request.POST.get('tipo')
+        region    = request.POST.get('region')
+        direccion = request.POST.get('direccion', '').strip()
+
+        if not tipo or not region or not direccion:
+            messages.error(request, 'Debes completar todos los campos.')
+            return render(request, 'carrito/despacho.html', {
+                'opciones': opciones,
+                'regiones': REGIONES,
+                'tarifas' : TARIFAS,
+            })
+
+        precio = TARIFAS.get(tipo, {}).get(region, 0)
+        opcion = OpcionDespacho.objects.filter(tipo=tipo).first()
+
+        request.session['despacho_info'] = {
+            'tipo'     : tipo,
+            'nombre'   : opcion.nombre if opcion else tipo,
+            'region'   : region,
+            'direccion': direccion,
+            'precio'   : precio,
+        }
+        messages.success(request, f'Despacho seleccionado: {opcion.nombre if opcion else tipo} a {region}.')
+        return redirect('/carrito/')
+
+    return render(request, 'carrito/despacho.html', {
+        'opciones': opciones,
+        'regiones': REGIONES,
+        'tarifas' : TARIFAS,
+        'despacho_info': request.session.get('despacho_info'),
+    })
 
 
 @login_required
@@ -91,17 +190,11 @@ def iniciar_pago_carrito(request):
         messages.error(request, 'Tu carrito está vacío.')
         return redirect('/carrito/')
 
-    despacho_id  = request.session.get('despacho_id')
-    costo_despacho = 0
-    if despacho_id:
-        try:
-            despacho = OpcionDespacho.objects.get(id=despacho_id)
-            costo_despacho = despacho.precio
-        except OpcionDespacho.DoesNotExist:
-            pass
+    despacho_info  = request.session.get('despacho_info')
+    costo_despacho = despacho_info.get('precio', 0) if despacho_info else 0
+    direccion      = despacho_info.get('direccion', '') if despacho_info else ''
 
-    total = int(carrito.total()) + costo_despacho
-
+    total      = int(carrito.total()) + costo_despacho
     buy_order  = f"TYCH-CART-{request.user.id}-{int(timezone.now().timestamp())}"
     session_id = str(request.user.id)
     return_url = request.build_absolute_uri('/carrito/commit-pago/')
@@ -115,7 +208,6 @@ def iniciar_pago_carrito(request):
 
     if response.status_code == 200:
         tb_data = response.json()
-        # Crear una Orden por cada prenda
         for item in items:
             Orden.objects.create(
                 prenda    = item.prenda,
@@ -125,9 +217,9 @@ def iniciar_pago_carrito(request):
                 token_ws  = tb_data['token'],
                 estado    = 'pendiente',
             )
-        # Guardar token en sesión para el commit
-        request.session['carrito_token'] = tb_data['token']
+        request.session['carrito_token']     = tb_data['token']
         request.session['carrito_buy_order'] = buy_order
+        request.session['carrito_direccion'] = direccion
 
         return render(request, 'transacciones/send-pay.html', {
             'transbank': tb_data,
@@ -148,7 +240,6 @@ def commit_pago_carrito(request):
         })
 
     ordenes = Orden.objects.filter(token_ws=token_ws, usuario=request.user)
-
     if not ordenes.exists():
         return render(request, 'transacciones/commit-pay.html', {
             'resultado': {'estado': 'ERROR', 'mensaje': 'Órdenes no encontradas.'}
@@ -162,12 +253,13 @@ def commit_pago_carrito(request):
         response_code = data.get('response_code')
 
         if status == 'AUTHORIZED' and response_code == 0:
+            direccion = request.session.get('carrito_direccion', '')
+
             for orden in ordenes:
                 orden.estado              = 'aprobada'
                 orden.codigo_autorizacion = data.get('authorization_code')
                 orden.fecha_pago          = timezone.now()
                 orden.save()
-
                 orden.prenda.estado = 'vendida'
                 orden.prenda.save()
 
@@ -176,15 +268,15 @@ def commit_pago_carrito(request):
                     orden=orden,
                     defaults={
                         'estado'   : 'pendiente',
-                        'direccion': orden.usuario.direccion or '',
+                        'direccion': direccion or orden.usuario.direccion or '',
                     }
                 )
 
-            # Limpiar carrito
             carrito = _get_or_create_carrito(request.user)
             carrito.items.all().delete()
-            request.session.pop('despacho_id', None)
+            request.session.pop('despacho_info', None)
             request.session.pop('carrito_token', None)
+            request.session.pop('carrito_direccion', None)
 
             pay_type  = 'Débito' if data.get('payment_type_code') == 'VD' else 'Crédito'
             monto_fmt = f"${int(data.get('amount', 0)):,}".replace(',', '.')
@@ -206,7 +298,6 @@ def commit_pago_carrito(request):
                 orden.save()
                 orden.prenda.estado = 'disponible'
                 orden.prenda.save()
-
             resultado = {
                 'estado' : 'RECHAZADO',
                 'mensaje': 'El pago fue rechazado. Intenta con otra tarjeta.',

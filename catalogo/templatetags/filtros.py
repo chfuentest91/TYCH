@@ -9,3 +9,7 @@ def precio_clp(value):
         return f"{valor:,}".replace(",", ".")
     except:
         return value
+    
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key, 0)

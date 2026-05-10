@@ -23,7 +23,7 @@
                 <a href="/catalogo/publicar/" class="btn btn-light btn-sm me-2">+ Publicar Prenda</a>
                 {% else %}
                 <a href="/carrito/" class="btn btn-outline-light btn-sm me-2">
-                    🛒 Carrito
+                    Carrito
                     {% if user.is_authenticated %}
                     ({{ user.carrito.cantidad_items }})
                     {% endif %}
